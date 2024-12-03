@@ -95,12 +95,20 @@ function explode()
  end
 end
 
+enemy_behavior = {
+	[0] = {
+	action = {
+		[1] = function(e) e.ex += 1 end,
+		[2] = function(e) e.ex -= 1 end,
+  [3] = function(e) e.ey += 1 end,
+  [4] = function(e) e.ey -= 1 end
+ 	}
+ }
+}
+
 function _update()
  vx = 0
  vy = 0
- for e in all(enemies) do
- 	e.ey += 1
- end
  if btn(❎) and not ❎_pressed and cur_mode == 0 then
  	state = (state+4)
  	❎_pressed = true
@@ -174,18 +182,27 @@ function _update()
 	 px -= vx
 	 py -= vy
  end
+	for e in all(enemies) do
+ 		--check if its state is 0
+ 	if e.st == 0 then
+ 		--if it is assign a random state
+			e.st = flr(rnd(4)) + 1
+			e.⧗ = 30
+		elseif e.⧗ > 0 then
+ 		--if not, decrement the state counter and perform an action
+ 		e.⧗ -= 1
+ 		enemy_behavior[e.eid].action[e.st](e)
+ 		if e.⧗ <= 0 then
+ 			e.st = 0
+ 		end
+ 	end
+ end
 end
 
 function _draw()
  cls()
  map(0,0,0,0,16,16)
  for e in all(enemies) do
- 	--octorock-like enemy
- 	if e.eid == 0 then
- 		--check if its state is 0
- 		--if it is assign a random state
- 		--it not, decrement the state counter and perform an action
- 	end
  	spr(e.sp, e.ex, e.ey)
  end
  if swd_timer > 0 then
