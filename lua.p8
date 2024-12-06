@@ -6,6 +6,8 @@ function _init()
  spd = 2
  px = 32
  py = 32
+ hearts=6
+ maxhearts = 6
  vx = 0
  vy = 0
  ❎_pressed = false
@@ -22,6 +24,7 @@ function _init()
  mode_timer = 0
  enemies = {}
  spawn_enemies()
+ projectiles = {}
 end
 
 function spawn_enemies()
@@ -102,7 +105,7 @@ end
 function enemy_collide(e,dir)
 	if collide(e.ex, e.ey) then
 		if dir == '➡️' then
-			e.ex -= 1		
+			e.ex -= 1
 		elseif dir == '⬅️' then
 			e.ex += 1
 		elseif dir == '⬇️' then
@@ -116,10 +119,10 @@ end
 enemy_behavior = {
 	[0] = {
 	action = {
-		[1] = function(e) e.ex = clamp(e.ex+1, 0, 119) enemy_collide(e,'➡️') end,
-		[2] = function(e) e.ex = clamp(e.ex-1, 0, 119) enemy_collide(e,'⬅️') end,
-  [3] = function(e) e.ey = clamp(e.ey+1, 0, 119) enemy_collide(e,'⬇️') end,
-  [4] = function(e) e.ey = clamp(e.ey-1, 0, 119) enemy_collide(e,'⬆️') end
+		[1] = function(e) e.ex = clamp(e.ex+1, 0, 119) enemy_collide(e,'➡️') if e.⧗ == 15 then add(projectiles,{dir='➡️',speed=2,sp=19,px=e.ex,py=e.ey}) end end,
+		[2] = function(e) e.ex = clamp(e.ex-1, 0, 119) enemy_collide(e,'⬅️') if e.⧗ == 15 then add(projectiles,{dir='⬅️',speed=2,sp=19,px=e.ex,py=e.ey}) end end,
+  [3] = function(e) e.ey = clamp(e.ey+1, 0, 119) enemy_collide(e,'⬇️') if e.⧗ == 15 then add(projectiles,{dir='⬇️',speed=2,sp=19,px=e.ex,py=e.ey}) end end,
+  [4] = function(e) e.ey = clamp(e.ey-1, 0, 119) enemy_collide(e,'⬆️') if e.⧗ == 15 then add(projectiles,{dir='⬆️',speed=2,sp=19,px=e.ex,py=e.ey}) end end
  	}
  }
 }
@@ -214,11 +217,21 @@ function _update()
  		end
  	end
  end
+ for p in all(projectiles) do
+ 	if p.dir == '➡️' then p.px += p.speed
+ 	elseif p.dir == '⬅️' then p.px -= p.speed
+ 	elseif p.dir == '⬆️' then p.py -= p.speed
+ 	elseif p.dir == '⬇️' then p.py += p.speed
+ 	end
+ end
 end
 
 function _draw()
  cls()
  map(0,0,0,0,16,16)
+ for p in all(projectiles) do
+ 	spr(p.sp,p.px,p.py)
+ end
 	for e in all(enemies) do
 	 if e.eid==0 then
 	  local s,fx,fy=e.sp,false,false
@@ -253,6 +266,13 @@ function _draw()
  local s=state<3 and state+1 or (state<4 and 3 or (state==7 and 6 or state))
  local fx=state==3 or state==7
  spr(s,px,py,1,1,fx)
+ for c=maxhearts,0,-1 do
+ 	if ~c%2 and c <= hearts do
+ 		spr(20,128-(8*c),4)
+ 	elseif c > hearts do
+ 		spr(22,128-(8*c),4)
+ 	end
+ end
 end
 __gfx__
 00000000000000000000000000000000000070000000000000000000000770000000000030033003bbbbbbbb5555555500000000000000000000000000000000
