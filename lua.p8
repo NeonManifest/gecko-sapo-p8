@@ -6,8 +6,8 @@ function _init()
  spd = 2
  px = 32
  py = 32
- hearts=6
- maxhearts = 6
+ hearts=3
+ maxhearts=6
  vx = 0
  vy = 0
  ❎_pressed = false
@@ -266,13 +266,17 @@ function _draw()
  local s=state<3 and state+1 or (state<4 and 3 or (state==7 and 6 or state))
  local fx=state==3 or state==7
  spr(s,px,py,1,1,fx)
- for c=maxhearts,0,-1 do
- 	if ~c%2 and c <= hearts do
- 		spr(20,128-(8*c),4)
- 	elseif c > hearts do
- 		spr(22,128-(8*c),4)
- 	end
- end
+	for c = 1, maxhearts, 2 do
+	 local x = 128 - (5 * (maxhearts - c + 1))
+	 if c < hearts then
+	  spr(20, x, 4)
+	 elseif c == hearts then
+	  spr(21, x, 4)
+	 else
+	  spr(22, x, 4)
+	 end
+	end
+
 end
 __gfx__
 00000000000000000000000000000000000070000000000000000000000770000000000030033003bbbbbbbb5555555500000000000000000000000000000000
