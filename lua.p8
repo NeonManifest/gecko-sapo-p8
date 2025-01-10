@@ -8,6 +8,7 @@ function _init()
  py = 32
  hearts=6
  maxhearts=6
+ bombs = 0
  vx = 0
  vy = 0
  ❎_pressed = false
@@ -18,6 +19,8 @@ function _init()
  bmb_cd = 0
  bomb_x = nil
  bomb_y = nil
+ bomb_distance = 4
+ following_bombs = {}
  ui_offset = 16
  mode = {true,true}
  cur_mode = 0
@@ -49,6 +52,24 @@ end
 
 function animation_lock(duration)
 		lock_timer = duration
+end
+
+function player_damage(pow)
+	hearts -= pow
+	if hearts <= 0 then
+		run()
+	end
+end
+
+function gain_bomb(amount)
+	bombs += amount
+	for i=1,amount do
+		if #following_bombs > 0 then
+			add(following_bombs,{bx=following_bombs[1].bx,by=following_bombs[1].by})
+		else
+			add(following_bombs,{bx=px,by=py})
+		end
+	end
 end
 
 function collide(px,py)
@@ -87,6 +108,7 @@ function cut_enemy()
 	  if (dx * dx + dy * dy) < 32 then
 	  	e.♥ -= 1
 	  	if e.♥ <= 0 then
+	  		gain_bomb(1)
 	  		del(enemies,e)
 	  	end
 	 	end
@@ -137,10 +159,10 @@ end
 enemy_behavior = {
 	[0] = {
 	action = {
-		[1] = function(e) e.ex = clamp(e.ex+1, 0, 119) enemy_collide(e,'➡️') if e.⧗ == 15 then add(projectiles,{dir='➡️',speed=2,sp=19,px=e.ex,py=e.ey}) end end,
-		[2] = function(e) e.ex = clamp(e.ex-1, 0, 119) enemy_collide(e,'⬅️') if e.⧗ == 15 then add(projectiles,{dir='⬅️',speed=2,sp=19,px=e.ex,py=e.ey}) end end,
-  [3] = function(e) e.ey = clamp(e.ey+1, 0, 119) enemy_collide(e,'⬇️') if e.⧗ == 15 then add(projectiles,{dir='⬇️',speed=2,sp=19,px=e.ex,py=e.ey}) end end,
-  [4] = function(e) e.ey = clamp(e.ey-1, 0, 119) enemy_collide(e,'⬆️') if e.⧗ == 15 then add(projectiles,{dir='⬆️',speed=2,sp=19,px=e.ex,py=e.ey}) end end
+		[1] = function(e) e.ex = clamp(e.ex+1, 0, 119) enemy_collide(e,'➡️') if e.⧗ == 15 then add(projectiles,{dir='➡️',speed=2,sp=19,px=e.ex,py=e.ey,pow=1}) end end,
+		[2] = function(e) e.ex = clamp(e.ex-1, 0, 119) enemy_collide(e,'⬅️') if e.⧗ == 15 then add(projectiles,{dir='⬅️',speed=2,sp=19,px=e.ex,py=e.ey,pow=1}) end end,
+  [3] = function(e) e.ey = clamp(e.ey+1, 0, 119) enemy_collide(e,'⬇️') if e.⧗ == 15 then add(projectiles,{dir='⬇️',speed=2,sp=19,px=e.ex,py=e.ey,pow=1}) end end,
+  [4] = function(e) e.ey = clamp(e.ey-1, 0, 119) enemy_collide(e,'⬆️') if e.⧗ == 15 then add(projectiles,{dir='⬆️',speed=2,sp=19,px=e.ex,py=e.ey,pow=1}) end end
  	}
  }
 }
@@ -153,7 +175,8 @@ function _update()
  	❎_pressed = true
  	swd_timer = 15
  	animation_lock(15)
- elseif btn(❎) and not ❎_pressed and cur_mode == 1 then
+ elseif btn(❎) and not ❎_pressed and cur_mode == 1 and bombs > 0 then
+ 	bombs -= 1
  	if bomb_x != nil then
  		explode()
  	end
@@ -248,7 +271,7 @@ function _update()
 			local dx = p.px - px
 	  local dy = p.py - py
 	  if (dx * dx + dy * dy) < 9 then
-	  	hearts -= 1
+	  	player_damage(p.pow)
 	  	del(projectiles,p)
 	 	end
 	 end
@@ -305,7 +328,10 @@ function _draw()
 	  spr(22, x, 4)
 	 end
 	end
-
+	for i=1, bombs do
+		spr(16,px,py)
+	end
+	print("bombs: "..bombs, 5, 5, 7)
 end
 __gfx__
 00000000000000000000000000000000000070000000000000000000000770000000000030033003bbbbbbbb5555555500000000000000000000000000000000
